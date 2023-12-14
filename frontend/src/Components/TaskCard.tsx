@@ -47,6 +47,10 @@ export default function TaskCard({ task }: Props) {
       className="bg-gray-600/50 p-2.5 h-[100px] min-h-[100px] items-center flex  text-left rounded-md mx-4 cursor-grab"
     >
       {task.content}
+
+
+        {/* <button className="bg-red-600 rounded-md text-white px-2 py-1" >Delete</button> */}
+  
     </div>
   );
 }

@@ -9,13 +9,14 @@ interface Props {
   column: Column;
   createTask : (columnId:Id) =>void;
   tasks: Task[],
+  index: number
 }
 
 export default function ColumnContainer(props: Props) {
-  const { column , createTask , tasks } = props;
+  const { column , createTask , tasks , index } = props;
 
   const tasksIds = useMemo(()=>{ return tasks.map(task=>task.id) },[tasks])
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
+  const { setNodeRef,listeners,attributes, transform, transition, isDragging } =
     useSortable({
       id: column.id,
       data: {
@@ -78,9 +79,12 @@ export default function ColumnContainer(props: Props) {
       </div>
 
       {/* column footer  */}
-      <button className="bg-indigo-600 text-white rounded-b-md py-2" onClick={()=>createTask(column.id)} >
+      {
+        index === 0 && 
+      <button className="bg-indigo-600  text-white rounded-b-md py-2" onClick={()=>createTask(column.id)} >
         Add Task
       </button>
+      }
     </div>
   );
 }

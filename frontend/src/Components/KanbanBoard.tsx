@@ -14,19 +14,36 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
 export default function KanbanBoard() {
-  const [columns, setColumns] = useState<Column[]>([]);
+  const [columns] = useState<Column[]>([
+    {
+        id:nanoid(),
+        title:'Todo'
+    },
+    {
+        id:nanoid(),
+        title:'In Progress'
+    },
+    {
+        id:nanoid(),
+        title:'Completed'
+    },
+    {
+        id:nanoid(),
+        title:'Backlogs'
+    },
+  ]);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  function createNewColumn() {
-    const columnToAdd: Column = {
-      id: nanoid(),
-      title: `Column ${columns.length + 1}`,
-    };
-    setColumns([...columns, columnToAdd]);
-  }
+//   function createNewColumn() {
+//     const columnToAdd: Column = {
+//       id: nanoid(),
+//       title: `Column ${columns.length + 1}`,
+//     };
+//     setColumns([...columns, columnToAdd]);
+//   }
   function onDragStartHandler(event: DragStartEvent) {
     console.log("Drag start", event);
     if (event.active.data.current?.type === "Column") {
@@ -49,15 +66,15 @@ export default function KanbanBoard() {
 
     if (activeId === overId) return;
 
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex(
-        (col) => col.id === activeId
-      );
-      const overColumnIndex = columns.findIndex(
-        (col) => col.id === overId
-      );
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
-    });
+    // setColumns((columns) => {
+    //   const activeColumnIndex = columns.findIndex(
+    //     (col) => col.id === activeId
+    //   );
+    //   const overColumnIndex = columns.findIndex(
+    //     (col) => col.id === overId
+    //   );
+    //   return arrayMove(columns, activeColumnIndex, overColumnIndex);
+    // });
   }
   function createTask(columnId: Id) {
     const newTask: Task = {
@@ -65,6 +82,7 @@ export default function KanbanBoard() {
       columnId,
       content: `Task ${tasks.length + 1}`,
     };
+    
     setTasks([...tasks, newTask]);
   }
   function onDragOverHandler(event:DragOverEvent){
@@ -116,10 +134,11 @@ export default function KanbanBoard() {
       <DndContext onDragStart={onDragStartHandler} onDragEnd={onDragEndHandler} onDragOver={onDragOverHandler} >
         <div className="flex  items-center gap-4">
           <SortableContext items={columnsId}>
-            {columns?.map((col) => {
+            {columns?.map((col,index) => {
               return (
                 <ColumnContainer
                   key={col.id}
+                  index={index}
                   column={col}
                   createTask={createTask}
                   tasks={tasks.filter((task) => task.columnId === col.id)}
@@ -127,18 +146,19 @@ export default function KanbanBoard() {
               );
             })}
           </SortableContext>
-          <button
+          {/* <button
             className="bg-indigo-600 py-2 px-4 rounded-md"
             onClick={createNewColumn}
           >
             Add Column
-          </button>
+          </button> */}
         </div>
         {createPortal(
           <DragOverlay>
             {activeColumn && (
               <ColumnContainer
                 column={activeColumn}
+                index={0}
                 createTask={createTask}
                 tasks={tasks.filter(
                   (task) => task.columnId === activeColumn.id
