@@ -10,6 +10,16 @@ const taskSchema = new mongoose.Schema({
         required:true,
 
     },
+    todos:[
+        {
+            id:String,
+            content:String,
+            columnId:String,
+            createdAt:String,
+            assignedTo:String,
+            status:String
+        }
+    ]
 })
 
 module.exports = mongoose.model('Tasks',taskSchema)

@@ -26,7 +26,18 @@ async function getTask(){
     return await dataBase.find({},{__v:0})
 }
 
+async function getIndividualTask(id){
+    const result = await dataBase.findOne({
+        taskId:id
+    },{__v:0})
+    return result
+}  
+async function addTodos(id,todo){
+    await dataBase.updateOne({ taskId: id }, { $push: { todos: todo } });
+}
 module.exports={
     addTask,
-    getTask
+    getTask,
+    getIndividualTask,
+    addTodos
 }

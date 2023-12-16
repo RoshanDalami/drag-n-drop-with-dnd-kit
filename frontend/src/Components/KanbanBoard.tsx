@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Column, Task, Id } from "../types";
 import { nanoid } from "nanoid";
 import ColumnContainer from "./ColumnContainer";
@@ -12,31 +12,52 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
+import { useParams } from "react-router-dom";
 
 export default function KanbanBoard() {
+  const {id} = useParams();
   const [columns] = useState<Column[]>([
     {
-        id:nanoid(),
-        title:'Todo'
+        id:'1',
+        title:'Todo',
+        status:'todo'
     },
     {
-        id:nanoid(),
-        title:'In Progress'
+        id:'2',
+        title:'In Progress',
+        status:'inprogress'
     },
     {
-        id:nanoid(),
-        title:'Completed'
+        id:'3',
+        title:'Completed',
+        status:'completed'
     },
     {
-        id:nanoid(),
-        title:'Backlogs'
+        id:'4',
+        title:'Backlogs',
+        status:'backlog'
     },
   ]);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  
+  const [individualTask,setIndividualTask] = useState({})
 
+  const fetchData = async ()=>{
+    const response = await fetch(`http://localhost:8000/tasks/${id}`)
+    const data = await response.json();
+    setIndividualTask(data)
+    setTasks(data.todos)
+  }
+  console.log(individualTask,'one')
+  console.log(tasks,'two')
+
+  useEffect(()=>{
+    fetchData();
+  },[id])
+// console.log(individualTask)
 //   function createNewColumn() {
 //     const columnToAdd: Column = {
 //       id: nanoid(),
@@ -44,6 +65,9 @@ export default function KanbanBoard() {
 //     };
 //     setColumns([...columns, columnToAdd]);
 //   }
+
+
+
   function onDragStartHandler(event: DragStartEvent) {
     console.log("Drag start", event);
     if (event.active.data.current?.type === "Column") {
@@ -76,15 +100,33 @@ export default function KanbanBoard() {
     //   return arrayMove(columns, activeColumnIndex, overColumnIndex);
     // });
   }
-  function createTask(columnId: Id) {
-    const newTask: Task = {
-      id: nanoid(),
-      columnId,
-      content: `Task ${tasks.length + 1}`,
-    };
-    
-    setTasks([...tasks, newTask]);
+  async function createTask (columnId: Id) {
+    try {
+      
+      const newTask: Task = {
+        id: nanoid(),
+        columnId,
+        content: `task to do`,
+        status:'todo'
+      };
+      
+      const response =  await fetch(`http://localhost:8000/tasks/addTodo/${id}`,{
+        method:'post',
+        headers:{
+            "Content-Type":"application/json"
+        },
+        // mode:'cors',
+        body:JSON.stringify(newTask)
+    })
+    if(response.ok === true){
+      console.log(newTask)
+    }
+      
+    } catch (error) {
+      console.log(error)
+    }
   }
+
   function onDragOverHandler(event:DragOverEvent){
     // console.log(event)
     const { active, over } = event;
@@ -117,6 +159,8 @@ export default function KanbanBoard() {
 
     //dropping a task over a column
     const isOverColumn = over.data.current?.type === "Column";
+    console.log(over.data.current?.column?.status,'hello')
+
     if(isActiveTask && isOverColumn){
         setTasks(tasks => {
             const activeIndex = tasks.findIndex(t=>t.id === activeId)
@@ -131,19 +175,28 @@ export default function KanbanBoard() {
   }
   return (
     <div>
+      <div>
+        <h1 className="text-2xl font-bold">
+          {individualTask?.taskTitle}
+        </h1>
+      </div>
       <DndContext onDragStart={onDragStartHandler} onDragEnd={onDragEndHandler} onDragOver={onDragOverHandler} >
         <div className="flex  items-center gap-4">
           <SortableContext items={columnsId}>
             {columns?.map((col,index) => {
+              console.log(col.id)
               return (
                 <ColumnContainer
                   key={col.id}
                   index={index}
                   column={col}
                   createTask={createTask}
+
                   tasks={tasks.filter((task) => task.columnId === col.id)}
+                  // tasks={individualTask?.todos}
                 />
               );
+
             })}
           </SortableContext>
           {/* <button
@@ -160,9 +213,10 @@ export default function KanbanBoard() {
                 column={activeColumn}
                 index={0}
                 createTask={createTask}
-                tasks={tasks.filter(
-                  (task) => task.columnId === activeColumn.id
-                )}
+                tasks={tasks}
+                // tasks={tasks.filter(
+                //   (task) => task.columnId === activeColumn.id
+                // )}
               />
             )}
             {activeTask && <TaskCard task={activeTask} />}

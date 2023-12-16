@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form'
 import { nanoid } from 'nanoid';
 
-export default function AddBook() {
+export default function AddTask() {
 
     const {register , handleSubmit} = useForm();
     const addBook = async (data:any)=>{
@@ -34,6 +34,7 @@ export default function AddBook() {
             console.log(error)
         }
     }
+    
   return (
     <div>
       <form action="" onSubmit={handleSubmit((data)=>addBook(data))}  >

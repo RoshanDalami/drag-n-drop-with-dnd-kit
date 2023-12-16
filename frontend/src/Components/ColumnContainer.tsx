@@ -2,18 +2,23 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { Column,Id , Task  } from "../types";
 import { CSS } from "@dnd-kit/utilities";
 import TaskCard from "./TaskCard";
-import { useMemo } from "react";
+import {  useMemo } from "react";
 
 
 interface Props {
   column: Column;
   createTask : (columnId:Id) =>void;
   tasks: Task[],
-  index: number
+  index: number,
+
 }
 
 export default function ColumnContainer(props: Props) {
-  const { column , createTask , tasks , index } = props;
+  const { column , createTask,tasks, index } = props;
+
+
+
+
 
   const tasksIds = useMemo(()=>{ return tasks.map(task=>task.id) },[tasks])
   const { setNodeRef,listeners,attributes, transform, transition, isDragging } =
